@@ -86,8 +86,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(contact, { status: 201 });
   } catch (error: unknown) {
     console.error("Failed to create contact:", error);
-    const message = error instanceof Error ? error.message : "";
-    if (message.includes("unique") || message.includes("duplicate") || message.includes("crm_contacts_email_unique")) {
+    const errObj = error as Record<string, unknown>;
+    const message = errObj?.message as string || "";
+    const code = errObj?.code as string || "";
+    if (code === "23505" || message.includes("unique") || message.includes("duplicate") || message.includes("crm_contacts_email_unique")) {
       return NextResponse.json({ error: "Email already exists" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to create contact" }, { status: 500 });
